@@ -1,5 +1,5 @@
 CC =gcc
-CFLAGS =-Wall -pthread
+CFLAGS =-Wall -pthread -g
 LIBS =-lc
 
 server: src/server.c obj/client.o

@@ -25,4 +25,4 @@ int http_response_html(int clientID, int htmlfd);
 
 int http_response_css(int clientID, int cssfd);
 
-void *handle_client(int clientID);
+void *handle_client(void *clientID_void);

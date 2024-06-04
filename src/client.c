@@ -90,10 +90,15 @@ int http_response_css(int clientID, int cssfd){
 	return http_response_file(clientID, cssfd, CSS);
 }
 
-void *handle_client(int clientID){
+int http_fail_response(){
+
+}
+
+void *handle_client(void *clientID_void){
 	char requestType[8], fileRequest[100];
 	char clientRequest[1000];
 	int fd;
+	int clientID = *((int*)clientID_void);
 	if(clientID == -1){
 		printf("clientID is -1 so client does not exist or some other error\n");
 		return NULL;
@@ -101,8 +106,8 @@ void *handle_client(int clientID){
 	printf("Sending data to client now\n");
 	
 	recv(clientID, clientRequest, SIZE, 0);
-	printf("Full request is:\n%s", clientRequest);
-	sscanf(clientRequest, "%s %s", requestType, fileRequest);
+	printf("Full request is:%s\n", clientRequest);
+	sscanf(clientRequest, "%s %s\n\n", requestType, fileRequest);
 	/* Makes sure that the request is a GET request as no other requests are supported yet */
 	if(strcmp(requestType, "GET") != 0){
 		printf("Resquest of %s, an unsupported action has occured\n", requestType);
@@ -146,10 +151,13 @@ void *handle_client(int clientID){
 			}
 		}
 	}
-	printf("request served\n");
+	printf("request served\n\n");
 	if(fd != -1){
 		shutdown(fd, 2);
 	}
 	shutdown(clientID, 2);
 	return (void *)1;
 }
+
+
+
