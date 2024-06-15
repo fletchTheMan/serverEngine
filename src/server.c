@@ -24,15 +24,16 @@ int createSocketV4();
 int createSocketV6();
 
 void handle_sigint(int sig){
-	if(sig == SIGTERM){
-		should_exit = 1;
-		printf("Exiting now\n");
-	}
+	should_exit = 1;
+	printf("Exiting now\n");
 }
 
 int main(){
+	struct sigaction sa;
 	int isIPv6 = 0;
 	int socketID = 0;
+	sa.sa_handler = handle_sigint;
+	sigaction(SIGINT, &sa, NULL);
 	socketID = createSocket(isIPv6);
 	if(listen(socketID, 10) == -1){
 		printf("Unable to listen on the socket");
