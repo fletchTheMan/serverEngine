@@ -91,20 +91,20 @@ int http_response_css(int clientID, int cssfd){
 }
 
 int http_fail_response(){
-
+	return -1;
 }
 
 void *handle_client(void *clientID_void){
 	char requestType[8], fileRequest[100];
-	char clientRequest[1000];
+	char clientRequest[SIZE];
+	int messageSize = 0;
 	int fd;
 	int clientID = *((int*)clientID_void);
 	if(clientID == -1){
-		printf("clientID is -1 so client does not exist or some other error\n");
-		return NULL;
+		printf("clientID is -1 so client does not exist or some connection error\n");
 	}
 	printf("Sending data to client now\n");
-	
+
 	recv(clientID, clientRequest, SIZE, 0);
 	printf("Full request is:%s\n", clientRequest);
 	sscanf(clientRequest, "%s %s\n\n", requestType, fileRequest);
@@ -158,6 +158,3 @@ void *handle_client(void *clientID_void){
 	shutdown(clientID, 2);
 	return (void *)1;
 }
-
-
-

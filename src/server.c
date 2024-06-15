@@ -1,8 +1,5 @@
 #include <netdb.h>
 #include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -10,13 +7,31 @@
 #include <pthread.h>
 
 #include "client.h"
+/* inside of client.h
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/sendfile.h>
+#include <stdio.h>
+#include <string.h>
+#include <signal.h>
+#include <stdlib.h>
+*/
+
+int should_exit = 0;
 
 int createSocket(int isIPv6);
 int createSocketV4();
 int createSocketV6();
 
+void handle_sigint(int sig){
+	if(sig == SIGTERM){
+		should_exit = 1;
+		printf("Exiting now\n");
+	}
+}
+
 int main(){
-	int isIPv6 = 1;
+	int isIPv6 = 0;
 	int socketID = 0;
 	socketID = createSocket(isIPv6);
 	if(listen(socketID, 10) == -1){
@@ -27,19 +42,21 @@ int main(){
 	printf("Listening on the socket\n");
 	while(1){
 		pthread_t thread;
-		int clientID = -1;
+		int clientID;
 		clientID = accept(socketID, 0, 0);
-		if(clientID == -1){
-			continue;
+		if(clientID != -1){
+			pthread_create(&thread, NULL, handle_client, (void *)&clientID);
+			printf("Accepted the client on the socket\n");
+			pthread_detach(thread);
+			//handle_client((void*)&clientID);
 		}
-		printf("Accepted the client on the socket\n");
-		/*
-		pthread_create(&thread, NULL, handle_client, (void *)&clientID);
-		pthread_detach(thread);
-		*/
-		handle_client((void*)&clientID);
+		if(should_exit == 1){
+			break;
+		}
 	}
-	close(socketID);
+	if(shutdown(socketID, 2) != -1){
+		printf("Socket shutdown successful\n");
+	}
 	return 0;
 }
 
@@ -56,7 +73,7 @@ int createSocketV4(){
 	int socketID;
 	struct sockaddr_in hostAddr;
 
-	socketID = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+	socketID = socket(AF_INET, SOCK_STREAM, 0);
 	if(socketID < 0){
 		printf("Unable to create socket exiting now\n");
 		exit(-1);

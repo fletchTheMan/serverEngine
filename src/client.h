@@ -3,6 +3,8 @@
 #include <sys/sendfile.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
+#include <stdlib.h>
 
 #define SIZE 1000
 
